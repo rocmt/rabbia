@@ -14,7 +14,8 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 const $ = (id) => document.getElementById(id);
-const ADMIN = location.hash === "#admin";
+const isAdminUrl = () => location.hash === "#admin";
+window.addEventListener("hashchange", () => renderWho());
 
 let me = null;          // firebase user
 let ownerMode = false;  // signed in with Google (rules verify it's really you)
@@ -42,7 +43,7 @@ function showErr(e) {
   $("err").textContent = e?.code === "permission-denied"
     ? "Not allowed — that one isn't yours to change."
     : (e?.message || String(e));
-  setTimeout(() => ($("err").textContent = ""), 4000);
+  setTimeout(() => ($("err").textContent = ""), 8000);
 }
 const author = () => ({
   uid: me.uid,
@@ -55,7 +56,8 @@ const canManage = (item) => ownerMode || (item.uid === me?.uid && !item.byOwner)
 // ---------- auth ----------
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    try { await signInAnonymously(auth); } catch (e) { showErr(e); }
+    try { await signInAnonymously(auth); }
+    catch (e) { showErr(e); $("grid").replaceChildren(el("div", { class: "empty" }, "Sign-in failed: " + (e.code || e.message))); }
     return;
   }
   me = user;
@@ -79,7 +81,7 @@ function renderWho() {
       oninput: (e) => { nick = e.target.value; try { localStorage.setItem("tally-nick", nick); } catch {} },
     });
     who.append("You are", inp);
-    if (ADMIN) {
+    if (isAdminUrl()) {
       who.append(el("button", {
         onclick: () => signInWithPopup(auth, new GoogleAuthProvider()).catch(showErr),
       }, "Owner sign-in"));
@@ -99,7 +101,7 @@ function subscribe() {
 
 $("addForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  if (!me) return;
+  if (!me) { showErr(new Error("Not signed in yet — is Anonymous sign-in enabled in Firebase?")); return; }
   const title = $("newTitle").value.trim();
   if (!title) return;
   const type = $("newType").value;
