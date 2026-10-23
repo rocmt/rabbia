@@ -14,6 +14,11 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 const $ = (id) => document.getElementById(id);
+
+// Which page are we on? work keeps the original collections (existing data stays there).
+const SPACE = document.body.dataset.space === "life" ? "life" : "work";
+const BOARDS = SPACE === "life" ? "life_boards" : "boards";
+const TASKS  = SPACE === "life" ? "life_tasks"  : "tasks";
 const isAdminUrl = () => location.hash === "#admin";
 window.addEventListener("hashchange", () => renderWho());
 
@@ -93,9 +98,9 @@ function renderWho() {
 function subscribe() {
   if (subscribed) return;
   subscribed = true;
-  onSnapshot(query(collection(db, "boards"), orderBy("createdAt", "asc")),
+  onSnapshot(query(collection(db, BOARDS), orderBy("createdAt", "asc")),
     (s) => { boards = s.docs.map((d) => ({ id: d.id, ...d.data() })); render(); }, showErr);
-  onSnapshot(query(collection(db, "tasks"), orderBy("createdAt", "asc")),
+  onSnapshot(query(collection(db, TASKS), orderBy("createdAt", "asc")),
     (s) => { tasks = s.docs.map((d) => ({ id: d.id, ...d.data() })); render(); }, showErr);
 }
 
@@ -107,16 +112,16 @@ $("addForm").addEventListener("submit", async (e) => {
   const type = $("newType").value;
   const data = { ...author(), type, title };
   if (type === "counter") data.count = 0;
-  try { await addDoc(collection(db, "boards"), data); $("newTitle").value = ""; }
+  try { await addDoc(collection(db, BOARDS), data); $("newTitle").value = ""; }
   catch (err) { showErr(err); }
 });
 
 async function deleteBoard(b) {
   if (!confirm(`Delete “${b.title}”?`)) return;
   try {
-    const ts = await getDocs(query(collection(db, "tasks"), where("boardId", "==", b.id)));
+    const ts = await getDocs(query(collection(db, TASKS), where("boardId", "==", b.id)));
     await Promise.allSettled(ts.docs.map((d) => deleteDoc(d.ref)));
-    await deleteDoc(doc(db, "boards", b.id));
+    await deleteDoc(doc(db, BOARDS, b.id));
   } catch (e) { showErr(e); }
 }
 
@@ -156,7 +161,7 @@ function cardShell(b) {
 
 function counterCard(b) {
   const card = cardShell(b);
-  const ref = doc(db, "boards", b.id);
+  const ref = doc(db, BOARDS, b.id);
   const row = el("div", { class: "row" },
     el("button", {
       class: "tick primary",
@@ -182,7 +187,7 @@ function listCard(b) {
       el("label", {},
         el("input", {
           type: "checkbox", checked: !!t.done, disabled: !editable,
-          onchange: (e) => updateDoc(doc(db, "tasks", t.id), { done: e.target.checked }).catch(showErr),
+          onchange: (e) => updateDoc(doc(db, TASKS, t.id), { done: e.target.checked }).catch(showErr),
         }),
         el("span", {},
           el("span", { class: "t" }, t.text),
@@ -191,7 +196,7 @@ function listCard(b) {
       ),
       editable ? el("button", {
         class: "x", title: "Delete",
-        onclick: () => deleteDoc(doc(db, "tasks", t.id)).catch(showErr),
+        onclick: () => deleteDoc(doc(db, TASKS, t.id)).catch(showErr),
       }, "×") : null,
     );
     ul.append(li);
@@ -205,7 +210,7 @@ function listCard(b) {
       const text = input.value.trim();
       if (!text || !me) return;
       input.value = "";
-      try { await addDoc(collection(db, "tasks"), { ...author(), boardId: b.id, text, done: false }); }
+      try { await addDoc(collection(db, TASKS), { ...author(), boardId: b.id, text, done: false }); }
       catch (err) { input.value = text; showErr(err); }
     },
   }, input, el("button", {}, "Add"));
