@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rossana's counters</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#f6f1e7;--card:#fffdf8;--ink:#1d1b18;--muted:#7a7268;--line:#e3dccf;--work:#c2410c;--life:#1f5fa8;--late:#a21caf}
+  @media (prefers-color-scheme: dark){
+    :root{--paper:#16150f;--card:#201e18;--ink:#efe9dd;--muted:#9b9285;--line:#36322a;--work:#fb923c;--life:#8cb8ee;--late:#e879f9}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--paper);color:var(--ink);font:15px/1.45 Inter,system-ui,sans-serif;padding:24px 16px}
+  main{width:100%;max-width:640px;text-align:center}
+  h1{font-family:Fraunces,serif;font-size:44px;margin:0 0 32px;letter-spacing:-.5px}
+  .pick{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:480px){.pick{grid-template-columns:1fr}}
+  a.door{display:block;padding:36px 16px;border-radius:16px;background:var(--card);border:1px solid var(--line);
+    color:var(--ink);text-decoration:none;font-family:Fraunces,serif;font-size:30px;font-weight:700;transition:transform .15s}
+  a.door:hover{transform:translateY(-3px)}
+  a.work{border-top:5px solid var(--work)} a.life{border-top:5px solid var(--life)}
+  a.late{grid-column:1/-1;border-top:5px solid var(--late);font-size:26px}
+  a.door small{display:block;font:14px Inter,sans-serif;color:var(--muted);margin-top:6px;font-weight:400}
+</style>
+</head>
+<body>
+<main>
+  <h1>Rossana's counters</h1>
+  <div class="pick">
+    <a class="door work" href="work.html">Work<small>for colleagues</small></a>
+    <a class="door life" href="life.html">Life<small>for friends</small></a>
+    <a class="door late" href="how-many-times-was-rossana-late.html">How many times was Rossana late?<small>everyone can add one</small></a>
+  </div>
+</main>
+</body>
+</html>
